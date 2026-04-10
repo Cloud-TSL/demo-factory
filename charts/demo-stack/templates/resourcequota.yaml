@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: demo-{{ .Values.slug }}-quota
+  labels:
+    {{- include "demo-stack.labels" . | nindent 4 }}
+spec:
+  hard:
+    cpu: {{ (index .Values.tiers .Values.tier).quota.cpu | quote }}
+    memory: {{ (index .Values.tiers .Values.tier).quota.memory | quote }}
+    pods: {{ (index .Values.tiers .Values.tier).quota.pods | quote }}

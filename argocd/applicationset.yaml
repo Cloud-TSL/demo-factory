@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-factory
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/Cloud-TSL/demo-factory.git
+        revision: HEAD
+        files:
+          - path: "demos/clients/*.yaml"
+  template:
+    metadata:
+      name: "demo-{{ .slug }}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/part-of: demo-factory
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Cloud-TSL/demo-factory.git
+        targetRevision: HEAD
+        path: charts/demo-stack
+        helm:
+          valuesObject:
+            slug: "{{ .slug }}"
+            tier: "{{ .tier }}"
+            expiresAt: "{{ .expiresAt }}"
+            seedData: "{{ .seedData }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "demo-{{ .slug }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

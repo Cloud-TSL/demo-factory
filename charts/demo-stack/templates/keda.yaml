@@ -1,0 +1,24 @@
+{{- if .Values.keda.enabled }}
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
+metadata:
+  name: demo-{{ .Values.slug }}
+  labels:
+    {{- include "demo-stack.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ include "demo-stack.host" . }}
+  pathPrefixes:
+    - /
+  targetPendingRequests: 1
+  scaledownPeriod: {{ .Values.keda.cooldownPeriod }}
+  scaleTargetRef:
+    name: frontend
+    kind: Deployment
+    apiVersion: apps/v1
+    service: frontend
+    port: 80
+  replicas:
+    min: 0
+    max: {{ .Values.keda.maxReplicas }}
+{{- end }}

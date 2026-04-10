@@ -1,0 +1,76 @@
+name: Expire demos
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  expire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Find and remove expired demos
+        id: expire
+        run: |
+          python3 - <<'PYEOF'
+          import yaml, datetime, os
+          from pathlib import Path
+
+          clients_dir = Path("demos/clients")
+          today = datetime.date.today()
+          expired = []
+
+          for f in sorted(clients_dir.glob("*.yaml")):
+              with open(f) as fh:
+                  data = yaml.safe_load(fh)
+              if not data or "expiresAt" not in data:
+                  continue
+              exp = data["expiresAt"]
+              if isinstance(exp, str):
+                  exp_date = datetime.date.fromisoformat(exp)
+              else:
+                  exp_date = exp
+              if exp_date < today:
+                  expired.append(data["slug"])
+                  f.unlink()
+                  print(f"  Removed: {data['slug']} (expired {exp})")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              if not expired:
+                  print("No expired demos found.")
+                  out.write("has_expired=false\n")
+              else:
+                  slugs = ", ".join(expired)
+                  print(f"Expired demos: {slugs}")
+                  out.write("has_expired=true\n")
+                  out.write(f"slugs={slugs}\n")
+          PYEOF
+
+      - name: Create PR
+        if: steps.expire.outputs.has_expired == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "demo: expire ${{ steps.expire.outputs.slugs }}"
+          title: "Expire demos: ${{ steps.expire.outputs.slugs }}"
+          body: |
+            ## Expired demos removed
+
+            The following demos have passed their `expiresAt` date and their client files have been deleted:
+
+            **${{ steps.expire.outputs.slugs }}**
+
+            Merging this PR will trigger ArgoCD to delete the corresponding namespaces and all resources.
+
+            ---
+            *Automated by expire-demos workflow*
+          branch: auto/expire-demos
+          delete-branch: true

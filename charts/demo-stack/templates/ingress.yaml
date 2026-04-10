@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-{{ .Values.slug }}
+  labels:
+    {{- include "demo-stack.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingress.maxBodySize | quote }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ include "demo-stack.host" . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                {{- if .Values.keda.enabled }}
+                name: keda-interceptor
+                port:
+                  number: 8080
+                {{- else }}
+                name: frontend
+                port:
+                  number: 80
+                {{- end }}

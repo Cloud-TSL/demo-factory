@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    {{- include "demo-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "demo-stack.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        {{- include "demo-stack.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      {{- if .Values.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+      containers:
+        - name: backend
+          image: "{{ .Values.images.backend.repository }}:{{ .Values.images.backend.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=postgres;Port=5432;Database=demo;Username=demo;Password=demo-factory-db-pass"
+            - name: Jwt__Issuer
+              value: DemoFactory
+            - name: Jwt__Audience
+              value: DemoFactory.Demo
+            - name: Jwt__SigningKey
+              value: "demo-factory-jwt-signing-key-min-32-chars-long!!"
+            - name: Jwt__AccessTokenMinutes
+              value: "60"
+            - name: Auth__CookieName
+              value: demo_auth
+            - name: Auth__CookieSecure
+              value: "true"
+            - name: Auth__CookieSameSite
+              value: Lax
+            - name: Minio__Endpoint
+              value: "http://minio:9000"
+            - name: Minio__PublicEndpoint
+              value: "https://demo-{{ .Values.slug }}.{{ .Values.domain }}/s3"
+            - name: Minio__AccessKey
+              value: demominio
+            - name: Minio__SecretKey
+              value: demo-factory-minio-secret-key
+            - name: Minio__BucketName
+              value: demo-data
+            - name: Minio__UseSsl
+              value: "false"
+            - name: Cors__AllowedOrigins__0
+              value: "https://demo-{{ .Values.slug }}.{{ .Values.domain }}"
+            - name: Serilog__SeqUrl
+              value: ""
+            - name: PasswordReset__FrontendResetUrl
+              value: "https://demo-{{ .Values.slug }}.{{ .Values.domain }}/reset-password"
+            - name: Smtp__Host
+              value: ""
+          resources:
+            requests:
+              cpu: {{ (index .Values.tiers .Values.tier).backend.requests.cpu }}
+              memory: {{ (index .Values.tiers .Values.tier).backend.requests.memory }}
+            limits:
+              cpu: {{ (index .Values.tiers .Values.tier).backend.limits.cpu }}
+              memory: {{ (index .Values.tiers .Values.tier).backend.limits.memory }}
+          readinessProbe:
+            httpGet:
+              path: /health/stack
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health/stack
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    {{- include "demo-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    {{- include "demo-stack.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend

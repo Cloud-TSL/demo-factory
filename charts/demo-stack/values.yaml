@@ -1,0 +1,81 @@
+slug: ""
+tier: small
+expiresAt: ""
+seedData: default
+
+images:
+  backend:
+    repository: ghcr.io/cloud-tsl/cloud-next
+    tag: backend-0.1.4
+  frontend:
+    repository: ghcr.io/cloud-tsl/cloud-next
+    tag: frontend-0.1.4
+  postgres:
+    repository: postgres
+    tag: "17-alpine"
+  minio:
+    repository: minio/minio
+    tag: latest
+
+imagePullSecret: ghcr-pull-secret
+
+ghcrToken: ""  # GitHub PAT for pulling images from ghcr.io/cloud-tsl
+
+domain: lab.cloudtsl.com
+
+ingress:
+  className: nginx
+  maxBodySize: "25m"
+
+keda:
+  enabled: true
+  cooldownPeriod: 900
+  maxReplicas: 2
+
+tiers:
+  small:
+    backend:
+      requests:
+        cpu: 50m
+        memory: 96Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+    frontend:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+    postgres:
+      storage: 512Mi
+    minio:
+      storage: 512Mi
+    quota:
+      cpu: "1"
+      memory: 1Gi
+      pods: "10"
+  large:
+    backend:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    frontend:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    postgres:
+      storage: 2Gi
+    minio:
+      storage: 2Gi
+    quota:
+      cpu: "2"
+      memory: 2Gi
+      pods: "15"
