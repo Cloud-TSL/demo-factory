@@ -6,7 +6,7 @@ metadata:
     {{- include "demo-stack.labels" . | nindent 4 }}
     app.kubernetes.io/component: frontend
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       {{- include "demo-stack.selectorLabels" . | nindent 6 }}

@@ -16,12 +16,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                {{- if .Values.keda.enabled }}
-                name: keda-interceptor
-                port:
-                  number: 8080
-                {{- else }}
                 name: frontend
                 port:
                   number: 80
-                {{- end }}
