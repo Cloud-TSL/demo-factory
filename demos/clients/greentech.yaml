@@ -2,7 +2,6 @@ slug: greentech
 tier: large
 expiresAt: "2026-06-01"
 seedData: default
-branding:
-  primaryColor: "#16a34a"
-  logoUrl: ""
-  brandTitle: "GreenTech Recycling"
+primaryColor: "#16a34a"
+logoUrl: ""
+brandTitle: "GreenTech Recycling"

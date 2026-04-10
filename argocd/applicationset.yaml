@@ -33,9 +33,9 @@ spec:
             expiresAt: "{{ .expiresAt }}"
             seedData: "{{ .seedData }}"
             branding:
-              primaryColor: '{{ index . "branding.primaryColor" }}'
-              logoUrl: '{{ index . "branding.logoUrl" }}'
-              brandTitle: '{{ index . "branding.brandTitle" }}'
+              primaryColor: "{{ .primaryColor }}"
+              logoUrl: "{{ .logoUrl }}"
+              brandTitle: "{{ .brandTitle }}"
       destination:
         server: https://kubernetes.default.svc
         namespace: "demo-{{ .slug }}"
