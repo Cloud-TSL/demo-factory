@@ -1,24 +1,23 @@
 {{- if .Values.keda.enabled }}
-apiVersion: http.keda.sh/v1alpha1
-kind: HTTPScaledObject
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
 metadata:
-  name: {{ include "demo-stack.name" . }}
+  name: {{ include "demo-stack.name" . }}-frontend
   labels:
     {{- include "demo-stack.labels" . | nindent 4 }}
 spec:
-  hosts:
-    - {{ include "demo-stack.host" . }}
-  pathPrefixes:
-    - /
-  targetPendingRequests: 1
-  scaledownPeriod: {{ .Values.keda.cooldownPeriod }}
   scaleTargetRef:
     name: frontend
-    kind: Deployment
-    apiVersion: apps/v1
-    service: frontend
-    port: 80
-  replicas:
-    min: 0
-    max: {{ .Values.keda.maxReplicas }}
+  pollingInterval: 15
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  idleReplicaCount: 0
+  minReplicaCount: 1
+  maxReplicaCount: {{ .Values.keda.maxReplicas }}
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-monitoring-kube-prometheus-prometheus.monitoring:9090
+        query: sum(rate(nginx_ingress_controller_requests{host="{{ include "demo-stack.host" . }}"}[2m]))
+        threshold: "0.01"
+        activationThreshold: "0.001"
 {{- end }}
