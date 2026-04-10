@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   goTemplate: true
-  goTemplateOptions: ["missingkey=error"]
+  goTemplateOptions: ["missingkey=zero"]
   generators:
     - git:
         repoURL: https://github.com/Cloud-TSL/demo-factory.git
@@ -33,9 +33,9 @@ spec:
             expiresAt: "{{ .expiresAt }}"
             seedData: "{{ .seedData }}"
             branding:
-              primaryColor: '{{ dig "branding" "primaryColor" "" . }}'
-              logoUrl: '{{ dig "branding" "logoUrl" "" . }}'
-              brandTitle: '{{ dig "branding" "brandTitle" "" . }}'
+              primaryColor: '{{ index . "branding.primaryColor" }}'
+              logoUrl: '{{ index . "branding.logoUrl" }}'
+              brandTitle: '{{ index . "branding.brandTitle" }}'
       destination:
         server: https://kubernetes.default.svc
         namespace: "demo-{{ .slug }}"
