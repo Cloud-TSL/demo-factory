@@ -1,4 +1,7 @@
 {{- if .Values.keda.enabled }}
+# Service + Endpoints pointing to KEDA interceptor in keda namespace.
+# ExternalName doesn't work with nginx ingress controller cross-namespace,
+# so we use a ClusterIP service with manual Endpoints instead.
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,8 +9,23 @@ metadata:
   labels:
     {{- include "demo-stack.labels" . | nindent 4 }}
 spec:
-  type: ExternalName
-  externalName: keda-add-ons-http-interceptor-proxy.keda.svc.cluster.local
+  type: ClusterIP
   ports:
     - port: 8080
+      targetPort: 8080
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: keda-interceptor-1
+  labels:
+    kubernetes.io/service-name: keda-interceptor
+    {{- include "demo-stack.labels" . | nindent 4 }}
+addressType: FQDN
+ports:
+  - port: 8080
+    protocol: TCP
+endpoints:
+  - addresses:
+      - keda-add-ons-http-interceptor-proxy.keda.svc.cluster.local
 {{- end }}
