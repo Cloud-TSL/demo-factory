@@ -1,3 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  labels:
+    {{- include "demo-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+data:
+  config.js: |
+    window.__DEMO_CONFIG__ = {
+      slug: {{ .Values.slug | quote }},
+      primaryColor: {{ .Values.branding.primaryColor | default "" | quote }},
+      logoUrl: {{ .Values.branding.logoUrl | default "" | quote }},
+      brandTitle: {{ .Values.branding.brandTitle | default "" | quote }},
+    };
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,6 +29,8 @@ spec:
       app.kubernetes.io/component: frontend
   template:
     metadata:
+      annotations:
+        checksum/branding: {{ printf "%s-%s-%s" (.Values.branding.primaryColor | default "") (.Values.branding.logoUrl | default "") (.Values.branding.brandTitle | default "") | sha256sum }}
       labels:
         {{- include "demo-stack.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: frontend
@@ -40,6 +58,15 @@ spec:
               path: /
               port: 80
             periodSeconds: 10
+          volumeMounts:
+            - name: frontend-config
+              mountPath: /usr/share/nginx/html/config.js
+              subPath: config.js
+              readOnly: true
+      volumes:
+        - name: frontend-config
+          configMap:
+            name: frontend-config
 ---
 apiVersion: v1
 kind: Service

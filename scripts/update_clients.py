@@ -48,6 +48,15 @@ def cmd_add(args):
         "expiresAt": args.expires_at,
         "seedData": args.seed_data,
     }
+    branding = {}
+    if args.primary_color:
+        branding["primaryColor"] = args.primary_color
+    if args.logo_url:
+        branding["logoUrl"] = args.logo_url
+    if args.brand_title:
+        branding["brandTitle"] = args.brand_title
+    if branding:
+        data["branding"] = branding
     with open(path, "w") as f:
         yaml.dump(data, f, default_flow_style=False, sort_keys=False)
     print(f"Added demo: {args.slug} (tier={args.tier}, expires={args.expires_at})")
@@ -122,6 +131,9 @@ def main():
     p_add.add_argument("--tier", required=True, choices=["small", "large"])
     p_add.add_argument("--expires-at", required=True)
     p_add.add_argument("--seed-data", default="default")
+    p_add.add_argument("--primary-color", default="")
+    p_add.add_argument("--logo-url", default="")
+    p_add.add_argument("--brand-title", default="")
 
     p_ext = sub.add_parser("extend")
     p_ext.add_argument("--slug", required=True)

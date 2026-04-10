@@ -4,6 +4,11 @@ tier: small
 expiresAt: ""
 seedData: default
 
+branding:
+  primaryColor: ""
+  logoUrl: ""
+  brandTitle: ""
+
 images:
   backend:
     repository: ghcr.io/cloud-tsl/cloud-next

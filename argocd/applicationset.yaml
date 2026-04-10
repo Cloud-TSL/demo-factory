@@ -32,6 +32,10 @@ spec:
             tier: "{{ .tier }}"
             expiresAt: "{{ .expiresAt }}"
             seedData: "{{ .seedData }}"
+            branding:
+              primaryColor: '{{ dig "branding" "primaryColor" "" . }}'
+              logoUrl: '{{ dig "branding" "logoUrl" "" . }}'
+              brandTitle: '{{ dig "branding" "brandTitle" "" . }}'
       destination:
         server: https://kubernetes.default.svc
         namespace: "demo-{{ .slug }}"
