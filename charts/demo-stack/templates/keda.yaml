@@ -10,7 +10,6 @@ spec:
     name: frontend
   pollingInterval: 15
   cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
-  idleReplicaCount: 0
   minReplicaCount: 1
   maxReplicaCount: {{ .Values.keda.maxReplicas }}
   triggers:
@@ -18,6 +17,5 @@ spec:
       metadata:
         serverAddress: http://monitoring-kube-prometheus-prometheus.monitoring:9090
         query: sum(rate(nginx_ingress_controller_requests{host="{{ include "demo-stack.host" . }}"}[2m]))
-        threshold: "0.01"
-        activationThreshold: "0.001"
+        threshold: "0.5"
 {{- end }}
