@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: demo-{{ .Values.slug }}
+  name: {{ include "demo-stack.name" . }}
   labels:
     {{- include "demo-stack.labels" . | nindent 4 }}
   annotations:

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: demo-{{ .Values.slug }}-quota
+  name: {{ include "demo-stack.name" . }}-quota
   labels:
     {{- include "demo-stack.labels" . | nindent 4 }}
 spec:

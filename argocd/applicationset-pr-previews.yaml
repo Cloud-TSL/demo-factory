@@ -1,0 +1,63 @@
+# PR Preview ApplicationSet — watches Cloud-TSL/cloud-next PRs with "preview" label
+# Uses demo-stack chart from this repo with namePrefix=pr for pr-{N}.lab.cloudtsl.com URLs
+# KEDA scale-to-zero: frontend scales 0→2 after 15 min idle
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cloudnext-pr-previews
+  namespace: argocd
+spec:
+  generators:
+    - pullRequest:
+        github:
+          owner: Cloud-TSL
+          repo: cloud-next
+          tokenRef:
+            secretName: github-token
+            key: token
+          labels:
+            - preview
+        requeueAfterSeconds: 60
+  template:
+    metadata:
+      name: "pr-{{number}}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/part-of: demo-factory
+        demo-factory/type: pr-preview
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Cloud-TSL/demo-factory.git
+        targetRevision: HEAD
+        path: charts/demo-stack
+        helm:
+          valuesObject:
+            slug: "{{number}}"
+            namePrefix: pr
+            tier: small
+            ghcrToken: ""  # Overridden by parameter below
+          parameters:
+            - name: images.backend.tag
+              value: "backend-{{head_short_sha}}"
+            - name: images.frontend.tag
+              value: "frontend-{{head_short_sha}}"
+            - name: ghcrToken
+              value: "PLACEHOLDER"  # Replaced at apply time
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "pr-{{number}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+      info:
+        - name: PR
+          value: "https://github.com/Cloud-TSL/cloud-next/pull/{{number}}"
+        - name: Preview
+          value: "https://pr-{{number}}.lab.cloudtsl.com"

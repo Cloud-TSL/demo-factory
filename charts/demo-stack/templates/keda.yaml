@@ -2,7 +2,7 @@
 apiVersion: http.keda.sh/v1alpha1
 kind: HTTPScaledObject
 metadata:
-  name: demo-{{ .Values.slug }}
+  name: {{ include "demo-stack.name" . }}
   labels:
     {{- include "demo-stack.labels" . | nindent 4 }}
 spec:

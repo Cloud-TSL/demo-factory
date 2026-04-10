@@ -1,5 +1,9 @@
+{{- define "demo-stack.prefix" -}}
+{{ .Values.namePrefix | default "demo" }}
+{{- end }}
+
 {{- define "demo-stack.name" -}}
-demo-{{ .Values.slug }}
+{{ include "demo-stack.prefix" . }}-{{ .Values.slug }}
 {{- end }}
 
 {{- define "demo-stack.labels" -}}
@@ -7,7 +11,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: demo-factory
 demo-factory/slug: {{ .Values.slug }}
 demo-factory/tier: {{ .Values.tier }}
+{{- if .Values.expiresAt }}
 demo-factory/expires-at: {{ .Values.expiresAt | quote }}
+{{- end }}
 {{- end }}
 
 {{- define "demo-stack.selectorLabels" -}}
@@ -20,5 +26,5 @@ demo-factory/slug: {{ .Values.slug }}
 {{- end }}
 
 {{- define "demo-stack.host" -}}
-demo-{{ .Values.slug }}.{{ .Values.domain }}
+{{ include "demo-stack.prefix" . }}-{{ .Values.slug }}.{{ .Values.domain }}
 {{- end }}

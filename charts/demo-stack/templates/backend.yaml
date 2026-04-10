@@ -55,7 +55,7 @@ spec:
             - name: Minio__Endpoint
               value: "http://minio:9000"
             - name: Minio__PublicEndpoint
-              value: "https://demo-{{ .Values.slug }}.{{ .Values.domain }}/s3"
+              value: "https://{{ include "demo-stack.host" . }}/s3"
             - name: Minio__AccessKey
               value: demominio
             - name: Minio__SecretKey
@@ -65,11 +65,11 @@ spec:
             - name: Minio__UseSsl
               value: "false"
             - name: Cors__AllowedOrigins__0
-              value: "https://demo-{{ .Values.slug }}.{{ .Values.domain }}"
+              value: "https://{{ include "demo-stack.host" . }}"
             - name: Serilog__SeqUrl
               value: ""
             - name: PasswordReset__FrontendResetUrl
-              value: "https://demo-{{ .Values.slug }}.{{ .Values.domain }}/reset-password"
+              value: "https://{{ include "demo-stack.host" . }}/reset-password"
             - name: Smtp__Host
               value: ""
           resources:
