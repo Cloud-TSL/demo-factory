@@ -9,7 +9,7 @@
 {{- define "demo-stack.labels" -}}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: demo-factory
-demo-factory/slug: {{ .Values.slug }}
+demo-factory/slug: {{ .Values.slug | quote }}
 demo-factory/tier: {{ .Values.tier }}
 {{- if .Values.expiresAt }}
 demo-factory/expires-at: {{ .Values.expiresAt | quote }}
@@ -18,7 +18,7 @@ demo-factory/expires-at: {{ .Values.expiresAt | quote }}
 
 {{- define "demo-stack.selectorLabels" -}}
 app.kubernetes.io/part-of: demo-factory
-demo-factory/slug: {{ .Values.slug }}
+demo-factory/slug: {{ .Values.slug | quote }}
 {{- end }}
 
 {{- define "demo-stack.tierConfig" -}}
