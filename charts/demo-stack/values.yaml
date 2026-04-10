@@ -15,7 +15,7 @@ images:
     tag: backend-0.1.4
   frontend:
     repository: ghcr.io/cloud-tsl/cloud-next
-    tag: frontend-0.1.4
+    tag: frontend-demo-branding
   postgres:
     repository: postgres
     tag: "17-alpine"

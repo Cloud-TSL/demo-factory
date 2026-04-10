@@ -1,0 +1,8 @@
+slug: acme-corp
+tier: small
+expiresAt: "2026-05-15"
+seedData: default
+branding:
+  primaryColor: "#dc2626"
+  logoUrl: ""
+  brandTitle: "ACME Corporation"
